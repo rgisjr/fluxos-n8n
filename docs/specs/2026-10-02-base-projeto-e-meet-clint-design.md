@@ -12,7 +12,7 @@ Esta spec cobre três entregas, nesta ordem de construção:
 
 1. **Base do projeto** — estrutura de pastas, regras de trabalho (`CLAUDE.md`), git.
 2. **Fluxo "Alerta WhatsApp"** — alerta de erro e de negócio, reutilizado por todos os fluxos.
-3. **Fluxo "Anotação Reuniao Meet"** — transcrição do Google Meet → informações no deal da Clint.
+3. **Fluxo "Anotação Reuniao Meet"** — transcrição do Google Meet → anotações no deal da Clint.
 
 ## 2. Base do projeto
 
@@ -22,6 +22,7 @@ Esta spec cobre três entregas, nesta ordem de construção:
 fluxos n8n/
 ├── CLAUDE.md                     regras que o Claude segue em toda sessão
 ├── .mcp.json                     conexão MCP com o n8n (escopo de projeto)
+├── .env                          segredos locais (fora do git)
 ├── .gitignore
 ├── docs/
 │   ├── specs/                    designs aprovados
@@ -55,7 +56,7 @@ Se um teste falhar e não houver correção óbvia, o fluxo fica **inativo** e o
 
 - Todo fluxo ativo tem `errorWorkflow` = fluxo "Alerta WhatsApp".
 - Chamadas HTTP externas e de IA: `retryOnFail`, 3 tentativas, 2 s entre elas.
-- Nenhum segredo (token, senha, API key) no repositório. Fluxos referenciam credenciais do n8n por nome/ID.
+- Nenhum segredo (token, senha, API key) no repositório. Fluxos referenciam credenciais do n8n por nome/ID. O `.env` local (fora do git) guarda tokens só para consultas do Claude durante o desenvolvimento.
 - O MCP não cria credenciais: quando faltar uma, o Claude informa exatamente qual criar e com que tipo.
 - Nomes de fluxo em português, descritivos; pasta em `kebab-case`.
 
@@ -100,25 +101,30 @@ Enviar uma mensagem real de aviso de negócio para o número de destino e confir
 
 - **Workflow existente:** `Owu9NI5ScaU5zZfA` — https://n8n.grupotoda.com.br/workflow/Owu9NI5ScaU5zZfA
 - Hoje contém só o gatilho do Google Drive. O fluxo será construído **dentro dele** (mesmo ID).
+- **Contexto:** reuniões comerciais de "INSS de obras", agendadas na agenda da Sara. Padrão do evento (referência: `docs/referencias/evento-agenda.png`):
+  - Título: `INSS de obras: {Nome do lead} - {telefone com DDI} {texto livre}` (ex.: `INSS de obras: Cristiana Aparecida - 5531988302388 CRED ARNALDO`).
+  - Descrição: contém o link do deal, `https://app.clint.digital/deal/{dealId UUID}`.
+  - Anexos: gravação de vídeo e documento Google Docs do Gemini, com nome iniciado pelo título do evento.
 
 ### 4.1 Credenciais
 
 | Uso | Credencial n8n | ID |
 |---|---|---|
 | Google Drive (gatilho e leitura) | `sara` (googleDriveOAuth2Api) | `Xz7XkQuj0KDkVtW5` |
+| Google Agenda da Sara | `Google Calendar account` (googleCalendarOAuth2Api) | `dVWPfETb214FyT82` |
 | Clint API (header `api-token`) | `Header Clint` (httpHeaderAuth) | `qiMe1q95EEa3L2HI` |
 | IA | `grupotoda` (openAiApi) | `ynBZoBP7TIG7AJAZ` |
 
 ### 4.2 Passos
 
 1. **Gatilho Google Drive** — pasta `12LPKim0euEzdnAkPSorKccTx-6seq7Dk`, a cada minuto, evento **arquivo criado** (hoje está "pasta criada"; corrigir).
-2. **Filtrar** — aceitar apenas o documento Google Docs da reunião. Antes de construir, inspecionar um arquivo real da pasta para decidir se o documento usado é a "Transcrição", as "Anotações do Gemini" ou ambos. Regra: **uma execução útil por reunião** (o outro documento, se existir, é ignorado).
-3. **Extrair do título** — o título da reunião contém nome e telefone do lead. Telefone = sequência de dígitos (≥ 10). Nome = restante do título sem o telefone, separadores e sufixos do Meet (data/hora, "Transcrição", "Anotações do Gemini").
-   - Sem telefone no título → aviso de negócio "Reunião sem telefone no título" e fim.
-4. **Buscar deal** — `GET https://api.clint.digital/v1/deals?phone={telefone}&status=OPEN`.
-   - Nenhum resultado → repetir sem o DDI `55`.
-   - Mais de um → usar o de `updated_at` mais recente.
-   - Nenhum após as duas tentativas → aviso de negócio "Lead não encontrado na Clint" com título e link do documento; fim.
+2. **Filtrar** — aceitar apenas documentos Google Docs (ignora vídeo). Antes de construir, inspecionar um arquivo real da pasta para decidir se o documento usado é a "Transcrição", as "Anotações do Gemini" ou ambos. Regra: **uma execução útil por reunião** (o outro documento, se existir, é ignorado).
+3. **Achar o evento** — extrair o título da reunião do nome do arquivo (removendo sufixos do Meet: data/hora, "Transcrição", "Anotações do Gemini") e buscar na agenda da Sara o evento com esse título no dia de criação do arquivo.
+4. **Identificar o deal**:
+   - **Principal:** extrair o UUID do link `app.clint.digital/deal/{uuid}` da descrição do evento → `GET https://api.clint.digital/v1/deals/{uuid}`.
+   - **Plano B** (evento não encontrado, sem link ou deal inexistente): telefone = sequência de ≥ 10 dígitos do título → `GET /v1/deals?phone={telefone}&status=OPEN`; se vazio, repetir sem o DDI `55`; se mais de um, usar o de atualização mais recente.
+   - **Nenhum deal** → aviso de negócio "Lead não encontrado na Clint" com título e link do documento; fim.
+   - Nome do lead = parte do título entre `INSS de obras:` (ou `INSS de obra`) e o telefone; se não casar, usar o nome do contato do deal.
 5. **Ler documento** — download do Google Doc exportado como `text/plain`.
 6. **Extrair com IA** (OpenAI, saída JSON estruturada; prompt em `fluxos/meet-para-clint/prompts/extracao.md`):
 
@@ -129,49 +135,58 @@ Enviar uma mensagem real de aviso de negócio para o número de destino e confir
    | `negociacao_valores` | Valores discutidos |
    | `negociacao_forma_pagamento` | Forma de pagamento discutida |
    | `objecao_decisao` | Desculpa/objeção para a tomada de decisão (ex.: "precisa falar com a esposa") |
-   | `dia_retorno` | Data ISO `YYYY-MM-DD` ou `null` |
-   | `hora_retorno` | `HH:mm` ou `null` |
+   | `dia_retorno` | Data e hora combinadas para o retorno, em texto `dd/MM/yyyy HH:mm` (ou só data), ou `Não mencionado` |
    | `resumo` | Resumo da reunião em 5 a 8 linhas |
 
-   Regra do prompt: não inventar; o que não foi dito é `Não mencionado` (ou `null` nas datas). Datas relativas ("semana que vem", "sexta") são resolvidas a partir da data da reunião.
-7. **Atualizar deal** — `POST /v1/deals/{id}` com os campos personalizados. Um campo só é enviado se o novo valor **não** for `Não mencionado` (não apaga informação de reuniões anteriores). `dia_retorno` é gravado como `dd/MM/yyyy HH:mm` (09:00 se sem hora); se `null`, o campo não é enviado.
-8. **Criar tarefa** — `POST /v2/activities`:
-   - Com data: `type: TASK`, `title: "Retorno: {nome}"`, `due_at` = data + hora (09:00 se sem hora), fuso America/Sao_Paulo convertido para ISO UTC.
-   - Sem data: `title: "Definir retorno: {nome}"`, `due_at` = próximo dia útil (seg–sex, sem considerar feriados) após a data da execução, 09:00.
-   - `content`: resumo + itens extraídos + link do documento da transcrição.
+   Regras do prompt: não inventar; o que não foi dito é `Não mencionado`. Datas relativas ("semana que vem", "sexta") são resolvidas a partir da data da reunião.
+7. **Montar o bloco de texto**:
+   ```
+   📅 Reunião {dd/MM/yyyy}
+   • Mão de obra: {tipo_mao_de_obra}
+   • Recibo: {consegue_recibo}
+   • Valores: {negociacao_valores}
+   • Pagamento: {negociacao_forma_pagamento}
+   • Objeção: {objecao_decisao}
+   • Retorno: {dia_retorno}
+   Resumo: {resumo}
+   Transcrição: {link do documento}
+   ```
+8. **Gravar no deal** — ler o valor atual do campo "Anotações da reunião" (já obtido no passo 4) e gravar `POST /v1/deals/{id}` com **bloco novo + linha separadora + texto anterior** (reunião mais nova no topo). Se o mesmo documento já estiver no texto (link da transcrição presente), não grava de novo (evita duplicar em reprocessamento).
+
+Nenhuma tarefa/atividade é criada na Clint.
 
 ### 4.3 Configuração manual na Clint (usuário, uma vez)
 
-Criar no **deal** um grupo "Reunião" com 6 campos do tipo texto:
-Tipo de mão de obra · Consegue recibo · Negociação – valores · Negociação – forma de pagamento · Objeção para decisão · Dia de retorno.
-Depois, o Claude lê as chaves internas via `GET /v1/account/fields` e as usa no passo 7.
+Criar no **deal** 1 campo personalizado de texto (preferencialmente texto longo, se a Clint oferecer): **Anotações da reunião**.
+Depois, o Claude lê a chave interna via `GET /v1/account/fields` e a usa no passo 8.
 
 ### 4.4 Erros
 
-- Clint e OpenAI: 3 tentativas, 2 s entre elas.
+- Clint, Google e OpenAI: 3 tentativas, 2 s entre elas.
 - Falha técnica → fluxo "Alerta WhatsApp" (via `errorWorkflow`).
-- Casos de negócio (sem telefone, lead não encontrado) → aviso de negócio via sub-workflow; a execução termina com sucesso.
+- Caso de negócio (lead não encontrado) → aviso de negócio via sub-workflow; a execução termina com sucesso.
 
 ### 4.5 Teste
 
 O gatilho do Google Drive não pode ser executado pelo MCP. Teste:
 1. Usar uma transcrição de exemplo (real ou fictícia) como dado fixado (pin data) no gatilho/leitura.
-2. Rodar contra um **deal de teste** na Clint (telefone informado pelo usuário).
-3. Verificar no deal: campos preenchidos, tarefa criada com data e conteúdo corretos.
-4. Testar os ramos: telefone não encontrado; transcrição sem dia de retorno.
+2. Rodar contra um **deal de teste** na Clint (indicado pelo usuário), com evento de agenda contendo o link do deal.
+3. Verificar no deal: campo "Anotações da reunião" com o bloco no formato do passo 7.
+4. Testar os ramos: evento sem link (plano B por telefone); lead não encontrado; segunda reunião no mesmo deal (bloco novo no topo, anterior preservado); reprocessamento do mesmo documento (não duplica).
 5. Passando, ativar o fluxo.
 
 ### 4.6 Limitações conhecidas
 
-- A tarefa fica atribuída ao dono do token `Header Clint`; a API não permite escolher o responsável.
-- A API da Clint não envia anexos; o link do documento vai no conteúdo da tarefa.
+- O dia de retorno fica só no texto; o vendedor não recebe lembrete (decisão do usuário: não criar tarefa).
+- A API da Clint não envia anexos; o link do documento vai no texto.
 - Polling de 1 minuto: a atualização chega até ~1 min depois de o Meet salvar o documento.
+- O campo cresce a cada reunião; não há limite de histórico (revisar se ficar grande demais).
 
 ## 5. Pendências antes/durante a implementação
 
 | Pendência | Responsável | Bloqueia |
 |---|---|---|
 | Dados da Evolution + credencial `apikey` | Usuário | Teste do Alerta WhatsApp |
-| Criar os 6 campos do deal na Clint | Usuário | Passo 7 do fluxo Meet |
-| Telefone de um deal de teste | Usuário | Teste do fluxo Meet |
+| Criar o campo "Anotações da reunião" no deal da Clint | Usuário | Passo 8 do fluxo Meet |
+| Indicar um deal de teste (e evento de teste) | Usuário | Teste do fluxo Meet |
 | Inspecionar arquivos reais da pasta do Meet | Claude | Passo 2 do fluxo Meet |
