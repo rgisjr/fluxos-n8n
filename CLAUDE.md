@@ -50,7 +50,7 @@ salvar cópia e README → commit, sem pedir aprovação. Se um teste falhar sem
 
 ## Regras fixas
 
-- Todo fluxo publicado tem `errorWorkflow` = **Alerta WhatsApp** (ID: `PENDENTE`).
+- Todo fluxo publicado tem `errorWorkflow` = **Alerta WhatsApp** (ID: `ktpi4gsUslWWAWyG`).
 - Avisos de negócio (ex.: "lead não encontrado") → Execute Workflow do Alerta WhatsApp
   com `{ titulo, mensagem, link }`.
 - HTTP externo, Google e IA: `retryOnFail`, 3 tentativas, 2000 ms.
@@ -68,7 +68,7 @@ salvar cópia e README → commit, sem pedir aprovação. Se um teste falhar sem
 | Google Agenda (conta Sara) | `Google Calendar account` | googleCalendarOAuth2Api | `dVWPfETb214FyT82` |
 | Clint CRM | `Header Clint` | httpHeaderAuth | `qiMe1q95EEa3L2HI` |
 | OpenAI | `grupotoda` | openAiApi | `ynBZoBP7TIG7AJAZ` |
-| Evolution API (alertas) | `PENDENTE` | httpHeaderAuth | `PENDENTE` |
+| Evolution API (alertas, provisória) | `evolution_valeng` | httpHeaderAuth | `dpb9deNkG8TenXdV` |
 
 ## Clint CRM (API)
 
@@ -83,5 +83,5 @@ salvar cópia e README → commit, sem pedir aprovação. Se um teste falhar sem
 
 | Fluxo | Pasta | ID n8n |
 |---|---|---|
-| Alerta WhatsApp | `fluxos/alerta-whatsapp` | `PENDENTE` |
+| Alerta WhatsApp | `fluxos/alerta-whatsapp` | `ktpi4gsUslWWAWyG` |
 | Anotação Reuniao Meet | `fluxos/meet-para-clint` | `Owu9NI5ScaU5zZfA` |
