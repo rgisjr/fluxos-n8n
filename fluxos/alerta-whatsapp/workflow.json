@@ -1,11 +1,11 @@
 {
   "id": "ktpi4gsUslWWAWyG",
   "name": "Alerta WhatsApp",
-  "active": false,
-  "versionId": "742c651a-5830-482b-bcbf-ec34c171998c",
-  "activeVersionId": null,
+  "active": true,
+  "versionId": "0dc703da-94cf-4179-9b18-cb5fcf0d6ee4",
+  "activeVersionId": "0dc703da-94cf-4179-9b18-cb5fcf0d6ee4",
   "createdAt": "2026-10-02T15:07:09.766Z",
-  "updatedAt": "2026-10-02T15:07:14.758Z",
+  "updatedAt": "2026-10-02T15:34:07.775Z",
   "description": "Fluxo de erro padrão e avisos de negócio: envia mensagem no WhatsApp via Evolution API, com anti-spam de 30 min por chave.",
   "settings": {
     "executionOrder": "v1",
@@ -15,12 +15,72 @@
   },
   "tags": [],
   "connections": {
-    "Erro em outro fluxo": { "main": [[{ "node": "Normalizar erro", "type": "main", "index": 0 }]] },
-    "Normalizar erro": { "main": [[{ "node": "Config", "type": "main", "index": 0 }]] },
-    "Config": { "main": [[{ "node": "Anti-spam 30 min", "type": "main", "index": 0 }]] },
-    "Anti-spam 30 min": { "main": [[{ "node": "Enviar WhatsApp", "type": "main", "index": 0 }]] },
-    "Aviso de outro fluxo": { "main": [[{ "node": "Normalizar aviso", "type": "main", "index": 0 }]] },
-    "Normalizar aviso": { "main": [[{ "node": "Config", "type": "main", "index": 0 }]] }
+    "Erro em outro fluxo": {
+      "main": [
+        [
+          {
+            "node": "Normalizar erro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalizar erro": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "Anti-spam 30 min",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anti-spam 30 min": {
+      "main": [
+        [
+          {
+            "node": "Enviar WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aviso de outro fluxo": {
+      "main": [
+        [
+          {
+            "node": "Normalizar aviso",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalizar aviso": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
   },
   "nodes": [
     {
@@ -28,7 +88,10 @@
       "name": "Erro em outro fluxo",
       "type": "n8n-nodes-base.errorTrigger",
       "typeVersion": 1,
-      "position": [0, 0],
+      "position": [
+        0,
+        0
+      ],
       "parameters": {}
     },
     {
@@ -36,7 +99,10 @@
       "name": "Normalizar erro",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [224, 0],
+      "position": [
+        224,
+        0
+      ],
       "parameters": {
         "mode": "runOnceForAllItems",
         "language": "javaScript",
@@ -48,15 +114,33 @@
       "name": "Config",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.5,
-      "position": [448, 96],
+      "position": [
+        448,
+        96
+      ],
       "parameters": {
         "mode": "manual",
         "includeOtherFields": true,
         "assignments": {
           "assignments": [
-            { "id": "cfg-url", "name": "evolutionUrl", "value": "PENDENTE", "type": "string" },
-            { "id": "cfg-instancia", "name": "instancia", "value": "PENDENTE", "type": "string" },
-            { "id": "cfg-numero", "name": "numeroDestino", "value": "PENDENTE", "type": "string" }
+            {
+              "id": "cfg-url",
+              "name": "evolutionUrl",
+              "value": "https://evolution.vendasx.com",
+              "type": "string"
+            },
+            {
+              "id": "cfg-instancia",
+              "name": "instancia",
+              "value": "rgis",
+              "type": "string"
+            },
+            {
+              "id": "cfg-numero",
+              "name": "numeroDestino",
+              "value": "5562983013515",
+              "type": "string"
+            }
           ]
         }
       }
@@ -66,7 +150,10 @@
       "name": "Anti-spam 30 min",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [672, 96],
+      "position": [
+        672,
+        96
+      ],
       "parameters": {
         "mode": "runOnceForAllItems",
         "language": "javaScript",
@@ -78,7 +165,10 @@
       "name": "Enviar WhatsApp",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.5,
-      "position": [896, 96],
+      "position": [
+        896,
+        96
+      ],
       "parameters": {
         "method": "POST",
         "url": "={{ $json.evolutionUrl }}/message/sendText/{{ $json.instancia }}",
@@ -92,21 +182,38 @@
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 2000,
-      "credentials": { "httpHeaderAuth": { "id": "dpb9deNkG8TenXdV", "name": "evolution_valeng" } }
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "dpb9deNkG8TenXdV",
+          "name": "evolution_valeng"
+        }
+      }
     },
     {
       "id": "1db12091-ca7e-4fad-9a1d-be7b8ad1ca3a",
       "name": "Aviso de outro fluxo",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.2,
-      "position": [0, 192],
+      "position": [
+        0,
+        192
+      ],
       "parameters": {
         "inputSource": "workflowInputs",
         "workflowInputs": {
           "values": [
-            { "name": "titulo", "type": "string" },
-            { "name": "mensagem", "type": "string" },
-            { "name": "link", "type": "string" }
+            {
+              "name": "titulo",
+              "type": "string"
+            },
+            {
+              "name": "mensagem",
+              "type": "string"
+            },
+            {
+              "name": "link",
+              "type": "string"
+            }
           ]
         }
       }
@@ -116,7 +223,10 @@
       "name": "Normalizar aviso",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [224, 192],
+      "position": [
+        224,
+        192
+      ],
       "parameters": {
         "mode": "runOnceForAllItems",
         "language": "javaScript",
@@ -125,5 +235,8 @@
     }
   ],
   "nodeGroups": [],
-  "meta": { "aiBuilderAssisted": true, "builderVariant": "mcp" }
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  }
 }

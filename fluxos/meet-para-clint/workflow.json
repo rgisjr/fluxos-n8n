@@ -2,29 +2,758 @@
   "id": "Owu9NI5ScaU5zZfA",
   "name": "Anotação Reuniao Meet",
   "active": true,
-  "versionId": "dac76e57-6e7d-4a1c-b77f-942f5ce97939",
-  "activeVersionId": "dac76e57-6e7d-4a1c-b77f-942f5ce97939",
+  "isArchived": false,
+  "versionId": "902610d7-7bd5-433d-85a1-122c763a3968",
+  "activeVersionId": "902610d7-7bd5-433d-85a1-122c763a3968",
+  "triggerCount": 1,
+  "nodeCount": 17,
   "createdAt": "2026-09-24T12:55:27.173Z",
-  "updatedAt": "2026-10-02T14:30:53.762Z",
+  "updatedAt": "2026-10-02T15:41:28.344Z",
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
     "timeSavedMode": "fixed",
     "callerPolicy": "workflowsFromSameOwner",
-    "availableInMCP": true
+    "availableInMCP": true,
+    "errorWorkflow": "ktpi4gsUslWWAWyG",
+    "timezone": "America/Sao_Paulo",
+    "saveDataErrorExecution": "all"
   },
   "tags": [],
   "parentFolderId": null,
-  "connections": {},
+  "connections": {
+    "Aguardar documento": {
+      "main": [
+        [
+          {
+            "node": "Extrair dados do título",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extrair dados do título": {
+      "main": [
+        [
+          {
+            "node": "Listar arquivos da reunião",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Listar arquivos da reunião": {
+      "main": [
+        [
+          {
+            "node": "Buscar eventos na agenda",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar eventos na agenda": {
+      "main": [
+        [
+          {
+            "node": "Consolidar reunião",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consolidar reunião": {
+      "main": [
+        [
+          {
+            "node": "Tem documento?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tem documento?": {
+      "main": [
+        [
+          {
+            "node": "Buscar deal",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Avisar sem transcrição",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar deal": {
+      "main": [
+        [
+          {
+            "node": "Escolher deal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Achou deal?": {
+      "main": [
+        [
+          {
+            "node": "Ler documento",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Avisar lead não encontrado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ler documento": {
+      "main": [
+        [
+          {
+            "node": "Extrair com IA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extrair com IA": {
+      "main": [
+        [
+          {
+            "node": "Montar anotação",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar anotação": {
+      "main": [
+        [
+          {
+            "node": "Já gravado?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Já gravado?": {
+      "main": [
+        null,
+        [
+          {
+            "node": "Gravar no deal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "Aguardar documento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Escolher deal": {
+      "main": [
+        [
+          {
+            "node": "Achou deal?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
   "nodes": [
     {
-      "id": "058b69d6-0367-4640-b5e0-6b1bc22edece",
-      "name": "Google Drive Trigger",
-      "type": "n8n-nodes-base.googleDriveTrigger",
-      "typeVersion": 1,
-      "position": [0, 0],
       "parameters": {
-        "pollTimes": { "item": [{ "mode": "everyMinute" }] },
+        "amount": 2,
+        "unit": "minutes"
+      },
+      "id": "4ce4559f-5705-4bab-9e05-483b581c2cb4",
+      "name": "Aguardar documento",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        224,
+        0
+      ],
+      "webhookId": "c21b7b74-5fc1-4df3-bd7c-a2834b7a72e9"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const pasta = $json;\nconst nome = pasta.name ?? '';\nconst m = nome.match(/^(.*?)\\s*-\\s*(\\d{4})\\/(\\d{2})\\/(\\d{2})\\s+(\\d{2}):(\\d{2})\\s+GMT([+-]\\d{2}):?(\\d{2})\\s*$/);\nconst titulo = (m ? m[1] : nome).trim();\nconst inicioReuniao = m\n  ? `${m[2]}-${m[3]}-${m[4]}T${m[5]}:${m[6]}:00${m[7]}:${m[8]}`\n  : (pasta.createdTime ?? $now.toISO());\nreturn { json: { pastaId: pasta.id, pastaNome: nome, titulo, inicioReuniao } };"
+      },
+      "id": "37f3dac8-999e-4cf8-ab7c-ad9cdf45351f",
+      "name": "Extrair dados do título",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://www.googleapis.com/drive/v3/files",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleDriveOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ \"'\" + $json.pastaId + \"' in parents and trashed = false\" }}"
+            },
+            {
+              "name": "fields",
+              "value": "files(id,name,mimeType,webViewLink,createdTime)"
+            },
+            {
+              "name": "supportsAllDrives",
+              "value": "true"
+            },
+            {
+              "name": "includeItemsFromAllDrives",
+              "value": "true"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "63d93c38-657a-429f-b0ef-181368904208",
+      "name": "Listar arquivos da reunião",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        672,
+        0
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Xz7XkQuj0KDkVtW5",
+          "name": "sara"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleCalendarOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "timeMin",
+              "value": "={{ DateTime.fromISO($('Extrair dados do título').item.json.inicioReuniao).minus({ hours: 4 }).toUTC().toISO() }}"
+            },
+            {
+              "name": "timeMax",
+              "value": "={{ DateTime.fromISO($('Extrair dados do título').item.json.inicioReuniao).plus({ hours: 4 }).toUTC().toISO() }}"
+            },
+            {
+              "name": "singleEvents",
+              "value": "true"
+            },
+            {
+              "name": "maxResults",
+              "value": "100"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "57fa78cc-14f7-4e33-b814-7b7ecf7cefad",
+      "name": "Buscar eventos na agenda",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        880,
+        0
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "cL4FeJhik5kcbnJB",
+          "name": "sara"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const ctx = $('Extrair dados do título').item.json;\nconst arquivos = $('Listar arquivos da reunião').item.json.files ?? [];\nconst eventos = $json.items ?? [];\nconst docs = arquivos.filter((f) => f.mimeType === 'application/vnd.google-apps.document');\nconst doc = docs.find((f) => /Anota[çc][õo]es do Gemini|Notes by Gemini/i.test(f.name))\n  ?? docs.find((f) => /Transcri[çc][ãa]o|Transcript/i.test(f.name))\n  ?? docs[0]\n  ?? null;\nconst norm = (s) => (s ?? '').toLowerCase().replace(/\\s+/g, ' ').trim();\nconst evento = eventos.find((e) => norm(e.summary) === norm(ctx.titulo)) ?? null;\nconst dealId = (evento?.description ?? '')\n  .match(/(?:clint\\.digital|useclint\\.com)\\/deal\\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i)?.[1] ?? null;\nreturn { json: {\n  ...ctx,\n  docId: doc?.id ?? null,\n  docNome: doc?.name ?? null,\n  docUrl: doc ? (doc.webViewLink ?? `https://docs.google.com/document/d/${doc.id}`) : null,\n  eventoId: evento?.id ?? null,\n  dealId,\n} };"
+      },
+      "id": "15397c65-bde5-4c84-8caf-b5a7eb5d88a8",
+      "name": "Consolidar reunião",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1104,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "tem-doc",
+              "leftValue": "={{ $json.docId ?? '' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "10a78364-a24d-4c05-acab-e075c4699382",
+      "name": "Tem documento?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1328,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "ktpi4gsUslWWAWyG",
+          "cachedResultName": "Alerta WhatsApp"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "titulo": "Reunião sem transcrição",
+            "mensagem": "={{ $json.titulo }}",
+            "link": "={{ 'https://drive.google.com/drive/folders/' + $json.pastaId }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "titulo",
+              "displayName": "titulo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "mensagem",
+              "displayName": "mensagem",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "link",
+              "displayName": "link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "mode": "each",
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "id": "9844b17f-e8c8-4a67-b9ce-5f61b49c69a3",
+      "name": "Avisar sem transcrição",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1552,
+        224
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://api.clint.digital/v1/deals/' + ($json.dealId ?? 'sem-link-do-card') }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "69bfb597-76b9-4777-b164-8c76115f0a34",
+      "name": "Buscar deal",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1584,
+        -16
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "qiMe1q95EEa3L2HI",
+          "name": "Header Clint"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const ctx = $('Tem documento?').item.json;\nconst dados = $json.data;\nconst deal = ctx.dealId && dados && !Array.isArray(dados) && dados.id === ctx.dealId ? dados : null;\nreturn { json: { ...ctx, deal } };"
+      },
+      "id": "fbbc7e04-6b81-4803-a794-b5c01f93d796",
+      "name": "Escolher deal",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1776,
+        -16
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "achou-deal",
+              "leftValue": "={{ $json.deal?.id ?? '' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "e99f32cd-bd08-4997-afac-6db1a6cf190a",
+      "name": "Achou deal?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2640,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "ktpi4gsUslWWAWyG",
+          "cachedResultName": "Alerta WhatsApp"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "titulo": "Reunião sem card na Clint",
+            "mensagem": "={{ $json.titulo + ($json.dealId ? ' (o link do card na agenda não abriu nenhum deal na Clint)' : ' (evento da agenda sem link do card da Clint)') }}",
+            "link": "={{ $json.docUrl }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "titulo",
+              "displayName": "titulo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "mensagem",
+              "displayName": "mensagem",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "link",
+              "displayName": "link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "mode": "each",
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "id": "760b976b-7586-4a2d-9d6c-d5d01e7e1381",
+      "name": "Avisar lead não encontrado",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        2864,
+        224
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://www.googleapis.com/drive/v3/files/' + $json.docId + '/export' }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleDriveOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "mimeType",
+              "value": "text/plain"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text",
+              "outputPropertyName": "texto"
+            }
+          }
+        }
+      },
+      "id": "b8c40dc1-d324-4927-8d4d-f39b9db86682",
+      "name": "Ler documento",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        2880,
+        -16
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Xz7XkQuj0KDkVtW5",
+          "name": "sara"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5.4-mini",
+          "cachedResultName": "GPT-5.4-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "Você analisa o documento de uma reunião comercial de \"INSS de obras\" (regularização e redução do INSS de obra de construção civil). Participam um vendedor da empresa e o lead, que pode ser o dono da obra e/ou um credenciado (parceiro que indicou o cliente).\n\nO documento pode conter:\n- notas automáticas do Gemini (Resumo, Decisões, Próximas etapas, Detalhes), e/ou\n- a transcrição da conversa (linhas \"Nome: fala\").\nUse a transcrição como fonte principal dos fatos; use as notas do Gemini como apoio.\n\nExtraia as informações abaixo e responda SOMENTE com JSON no formato definido.\n\nDefinições:\n- tipo_mao_de_obra: tipo de mão de obra que o cliente usou na obra (ex.: própria/familiar, pedreiro autônomo, empreiteiro, empresa contratada, mista). Inclua detalhes úteis (ex.: \"pedreiro autônomo sem registro\").\n- consegue_recibo: começa com \"Sim\", \"Não\", \"Parcialmente\" ou \"Não mencionado\"; depois, um detalhe curto sobre a comprovação de mão de obra (recibos, notas fiscais, contrato). Ex.: \"Sim – tem recibos assinados do pedreiro\".\n- negociacao_valores: valores discutidos (valor do INSS, valor com redução, honorários, descontos, propostas e contrapropostas), em R$.\n- negociacao_forma_pagamento: forma de pagamento discutida para os honorários e/ou o imposto (à vista, Pix, cartão, parcelado, entrada + parcelas).\n- objecao_decisao: o motivo ou desculpa que o lead deu para não decidir na hora (ex.: \"precisa falar com a esposa\", \"vai aguardar o projeto do arquiteto\", \"vai comparar preço\"). Se o lead fechou na reunião, escreva \"Fechou na reunião\".\n- dia_retorno: data e hora combinadas para o próximo contato, no formato dd/MM/yyyy HH:mm (ou dd/MM/yyyy se não houver hora). Resolva datas relativas (\"sexta\", \"semana que vem\", \"amanhã\") a partir da DATA DA REUNIÃO informada. Se houver só um prazo vago (\"quando o arquiteto mandar\"), descreva-o em texto.\n- resumo: 5 a 8 linhas, em português, com os pontos principais da conversa (situação da obra, interesse, próximos passos).\n\nRegras:\n- Não invente. Se algo não foi dito, use exatamente \"Não mencionado\".\n- Prefira as palavras do próprio lead quando forem relevantes.\n- Valores em reais no formato R$ 1.234,56.\n- Não inclua dados pessoais além do necessário (sem CPF, sem endereço completo)."
+            },
+            {
+              "content": "=DATA DA REUNIÃO: {{ DateTime.fromISO($('Achou deal?').item.json.inicioReuniao).setZone('America/Sao_Paulo').setLocale('pt-BR').toFormat('dd/MM/yyyy (cccc)') }}\nTÍTULO: {{ $('Achou deal?').item.json.titulo }}\n\nDOCUMENTO:\n{{ $json.texto }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {
+          "maxTokens": 8000,
+          "reasoning": {
+            "reasoningOptions": {
+              "effort": "low",
+              "summary": "none"
+            }
+          },
+          "textFormat": {
+            "textOptions": {
+              "type": "json_schema",
+              "name": "extracao_reuniao",
+              "schema": "{\"type\":\"object\",\"properties\":{\"tipo_mao_de_obra\":{\"type\":\"string\"},\"consegue_recibo\":{\"type\":\"string\"},\"negociacao_valores\":{\"type\":\"string\"},\"negociacao_forma_pagamento\":{\"type\":\"string\"},\"objecao_decisao\":{\"type\":\"string\"},\"dia_retorno\":{\"type\":\"string\"},\"resumo\":{\"type\":\"string\"}},\"required\":[\"tipo_mao_de_obra\",\"consegue_recibo\",\"negociacao_valores\",\"negociacao_forma_pagamento\",\"objecao_decisao\",\"dia_retorno\",\"resumo\"],\"additionalProperties\":false}",
+              "strict": true
+            }
+          }
+        }
+      },
+      "id": "115cbd06-e7e4-4e42-992c-b5851bb78be1",
+      "name": "Extrair com IA",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        3120,
+        -16
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "openAiApi": {
+          "id": "ynBZoBP7TIG7AJAZ",
+          "name": "grupotoda"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const CAMPO = 'notas_da_reuniao';\nconst ctx = $('Achou deal?').item.json;\nconst acharIa = (v) => {\n  if (typeof v === 'string') {\n    const s = v.trim();\n    if (!s.startsWith('{')) return null;\n    try { return acharIa(JSON.parse(s)); } catch (e) { return null; }\n  }\n  if (Array.isArray(v)) {\n    for (const x of v) { const r = acharIa(x); if (r) return r; }\n    return null;\n  }\n  if (v && typeof v === 'object') {\n    if ('tipo_mao_de_obra' in v) return v;\n    for (const x of Object.values(v)) { const r = acharIa(x); if (r) return r; }\n  }\n  return null;\n};\nconst ia = acharIa($json);\nif (!ia) throw new Error('Resposta da IA sem os campos esperados');\nconst esc = (s) => String(s ?? 'Não mencionado')\n  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')\n  .replace(/\\n/g, '<br>');\nconst data = DateTime.fromISO(ctx.inicioReuniao).setZone('America/Sao_Paulo').toFormat('dd/MM/yyyy HH:mm');\nconst itens = [\n  ['Mão de obra', ia.tipo_mao_de_obra],\n  ['Recibo', ia.consegue_recibo],\n  ['Valores', ia.negociacao_valores],\n  ['Pagamento', ia.negociacao_forma_pagamento],\n  ['Objeção', ia.objecao_decisao],\n  ['Retorno', ia.dia_retorno],\n];\nconst bloco = `<p><strong>📅 Reunião ${data}</strong></p>`\n  + `<p>${itens.map(([rotulo, valor]) => `• <strong>${rotulo}:</strong> ${esc(valor)}`).join('<br>')}</p>`\n  + `<p><strong>Resumo:</strong> ${esc(ia.resumo)}</p>`\n  + `<p><a href=\"${ctx.docUrl}\">Ver transcrição</a></p>`;\nconst atual = ctx.deal?.fields?.[CAMPO] ?? '';\nconst atualVazio = atual.replace(/<[^>]*>|&nbsp;|\\s/g, '') === '';\nconst jaGravado = !atualVazio && atual.includes(ctx.docId);\nconst html = atualVazio ? bloco : `${bloco}<p>────────────</p>${atual}`;\nconst htmlAscii = html.replace(/[^\\x00-\\x7F]/gu, (c) => `&#${c.codePointAt(0)};`);\nreturn { json: {\n  dealId: ctx.deal.id,\n  jaGravado,\n  corpo: { fields: { [CAMPO]: htmlAscii } },\n} };"
+      },
+      "id": "5e4a5d57-0428-47f2-82aa-2b184653d9b3",
+      "name": "Montar anotação",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3488,
+        -16
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ja-gravado",
+              "leftValue": "={{ $json.jaGravado }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "fb126e4e-73b8-455b-a685-0b490d33bff6",
+      "name": "Já gravado?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3744,
+        -16
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://api.clint.digital/v1/deals/' + $json.dealId }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.corpo) }}",
+        "options": {}
+      },
+      "id": "23f86db7-372c-470e-ade0-a8caa73744a6",
+      "name": "Gravar no deal",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        4080,
+        0
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "disabled": false,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "qiMe1q95EEa3L2HI",
+          "name": "Header Clint"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
         "triggerOn": "specificFolder",
         "folderToWatch": {
           "__rl": true,
@@ -33,9 +762,29 @@
         },
         "event": "folderCreated"
       },
-      "credentials": { "googleDriveOAuth2Api": { "id": "Xz7XkQuj0KDkVtW5", "name": "sara" } }
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "058b69d6-0367-4640-b5e0-6b1bc22edece",
+      "name": "Google Drive Trigger",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Xz7XkQuj0KDkVtW5",
+          "name": "sara"
+        }
+      }
     }
   ],
   "nodeGroups": [],
-  "meta": { "templateCredsSetupCompleted": true }
+  "activeVersion": {
+    "sameAsDraft": true
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  }
 }

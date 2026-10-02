@@ -1,7 +1,8 @@
 # Design — Base do projeto + Alerta WhatsApp + Fluxo Meet → Clint
 
 - **Data:** 2026-10-02
-- **Status:** aprovado em brainstorming, aguardando revisão da spec
+- **Status:** implementado e publicado em 2026-10-02 (ver README do fluxo para o estado atual)
+- **Mudança pós-aprovação:** plano B por telefone **removido** (decisão do usuário: o link do card sempre estará no evento; e a busca por telefone da Clint se mostrou insegura). Itens 4.2/4 e 4.5 que citam telefone estão superados.
 - **Instância n8n:** https://n8n.grupotoda.com.br
 
 ## 1. Objetivo

@@ -8,9 +8,8 @@ Avisar no WhatsApp (via Evolution API) quando:
 
 ## Link e ID no n8n
 
-- ID: `ktpi4gsUslWWAWyG`
+- ID: `ktpi4gsUslWWAWyG` (publicado — exigido pelo n8n para ser `errorWorkflow`)
 - https://n8n.grupotoda.com.br/workflow/ktpi4gsUslWWAWyG
-- Não precisa estar publicado: fluxos de erro e sub-fluxos rodam mesmo inativos.
 
 ## Gatilhos
 
@@ -34,14 +33,15 @@ Avisar no WhatsApp (via Evolution API) quando:
 
 | Nó | Credencial | Tipo | ID |
 |---|---|---|---|
-| Enviar WhatsApp | `evolution_valeng` (**provisória — confirmar**) | httpHeaderAuth (`apikey`) | `dpb9deNkG8TenXdV` |
+| Enviar WhatsApp | `evolution_valeng` (**chave errada — 401; trocar**) | httpHeaderAuth (`apikey`) | `dpb9deNkG8TenXdV` |
 
 ## Configuração manual necessária
 
-- [ ] Preencher no nó **Config**: `evolutionUrl` (sem `/` no final), `instancia`, `numeroDestino`
-      (formato `55DDDNÚMERO`). Hoje estão como `PENDENTE`.
-- [ ] Confirmar se `evolution_valeng` é a credencial certa; se não, indicar/criar outra
-      `httpHeaderAuth` com header `apikey`.
+- [x] **Config**: `evolutionUrl` = `https://evolution.vendasx.com`, `instancia` = `rgis`,
+      `numeroDestino` = `5562983013515`.
+- [ ] **Credencial**: `evolution_valeng` devolve **401 Unauthorized** na instância `rgis`.
+      Criar no n8n uma credencial `httpHeaderAuth` (ex.: `evolution_rgis`) com
+      Name = `apikey` e Value = chave da instância `rgis`, e trocar no nó "Enviar WhatsApp".
 
 ## Como testar
 
@@ -52,11 +52,14 @@ Arquivar o fluxo temporário depois.
 
 ## Limitações conhecidas
 
-- Enquanto o **Config** estiver `PENDENTE`, o envio falha (o erro fica só no histórico de
+- Enquanto a credencial estiver errada, o envio falha (o erro fica só no histórico de
   execuções do próprio Alerta; ele não tem `errorWorkflow`, para não entrar em loop).
 - Anti-spam só funciona em execuções de produção (dados estáticos não persistem em testes manuais).
 
 ## Histórico de decisões
+
+- 2026-10-02 — Teste real (execução 304792): chegou à Evolution, mas 401 com a credencial
+  provisória. Fluxo publicado mesmo assim (o n8n só aceita fluxo de erro publicado).
 
 - 2026-10-02 — Canal WhatsApp via Evolution (escolha do usuário). Anti-spam de 30 min
   porque gatilhos de polling a cada minuto poderiam gerar 60 alertas/hora. Um único fluxo

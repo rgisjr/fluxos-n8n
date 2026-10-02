@@ -65,10 +65,10 @@ salvar cópia e README → commit, sem pedir aprovação. Se um teste falhar sem
 | Uso | Nome | Tipo | ID |
 |---|---|---|---|
 | Google Drive (conta Sara) | `sara` | googleDriveOAuth2Api | `Xz7XkQuj0KDkVtW5` |
-| Google Agenda (conta Sara) | `Google Calendar account` | googleCalendarOAuth2Api | `dVWPfETb214FyT82` |
+| Google Agenda (conta Sara) | `sara` | googleCalendarOAuth2Api | `cL4FeJhik5kcbnJB` |
 | Clint CRM | `Header Clint` | httpHeaderAuth | `qiMe1q95EEa3L2HI` |
 | OpenAI | `grupotoda` | openAiApi | `ynBZoBP7TIG7AJAZ` |
-| Evolution API (alertas, provisória) | `evolution_valeng` | httpHeaderAuth | `dpb9deNkG8TenXdV` |
+| Evolution API (alertas) | `evolution_valeng` — **chave errada (401), trocar** | httpHeaderAuth | `dpb9deNkG8TenXdV` |
 
 ## Clint CRM (API)
 
