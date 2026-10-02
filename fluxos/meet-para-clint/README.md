@@ -37,7 +37,7 @@ são processadas.
 8. **Achou deal?** — não (evento sem link ou link que não abre card) → alerta
    "Reunião sem card na Clint". Nada é gravado.
 9. **Ler documento** — exporta o Google Doc como texto.
-10. **Extrair com IA** — OpenAI `gpt-5.4-mini`, saída JSON validada por schema; prompt em
+10. **Extrair com IA** — OpenAI `gpt-5.6-terra` (trocado pelo usuário), saída JSON validada por schema; prompt em
     [prompts/extracao.md](prompts/extracao.md).
 11. **Montar anotação** — bloco HTML (data, mão de obra, recibo, valores, pagamento, objeção,
     retorno, resumo, link da transcrição); bloco novo + separador + conteúdo anterior;
