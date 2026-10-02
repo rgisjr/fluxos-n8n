@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "n8n": {
+      "type": "http",
+      "url": "https://n8n.grupotoda.com.br/mcp-server/http"
+    },
+    "clint": {
+      "type": "http",
+      "url": "https://mcp.clint.digital"
+    }
+  }
+}
