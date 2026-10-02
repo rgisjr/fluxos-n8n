@@ -1,6 +1,6 @@
 # Prompt de extração — Meet → Clint
 
-Usado no nó **Extrair com IA** (OpenAI, saída JSON). Ao alterar aqui, atualizar o nó
+Usado no nó **Extrair com IA** (OpenAI `gpt-5.6-terra`, saída JSON validada por schema). Ao alterar aqui, atualizar o nó
 (e vice-versa) e registrar no README.
 
 ## Mensagem de sistema
@@ -20,7 +20,7 @@ Extraia as informações abaixo e responda SOMENTE com um JSON válido neste for
 {
   "tipo_mao_de_obra": "string",
   "consegue_recibo": "string",
-  "negociacao_valores": "string",
+  "negociacao": "string",
   "negociacao_forma_pagamento": "string",
   "objecao_decisao": "string",
   "dia_retorno": "string",
@@ -34,10 +34,14 @@ Definições:
 - consegue_recibo: começa com "Sim", "Não", "Parcialmente" ou "Não mencionado"; depois,
   um detalhe curto sobre a comprovação de mão de obra (recibos, notas fiscais, contrato).
   Ex.: "Sim – tem recibos assinados do pedreiro".
-- negociacao_valores: valores discutidos (valor do INSS, valor com redução, honorários,
-  descontos, propostas e contrapropostas), em R$.
-- negociacao_forma_pagamento: forma de pagamento discutida para os honorários e/ou o
-  imposto (à vista, Pix, cartão, parcelado, entrada + parcelas).
+- negociacao: SOMENTE o valor dos honorários, ou seja, o que a empresa cobrou pelo serviço:
+  proposta inicial, descontos, contrapropostas e valor final acordado, em R$. NÃO inclua
+  valores do INSS/imposto (valor bruto, valor com redução, economia).
+- negociacao_forma_pagamento: descreva em detalhe o que foi negociado para o pagamento, para o
+  time entender exatamente o combinado: forma (Pix, cartão, boleto, débito em conta), à vista
+  ou parcelado, entrada, número e valor das parcelas, datas e condições (ex.: "após a
+  assinatura do contrato"). Se houver condições diferentes para os honorários e para o
+  imposto, deixe claro a que cada uma se refere.
 - objecao_decisao: o motivo ou desculpa que o lead deu para não decidir na hora
   (ex.: "precisa falar com a esposa", "vai aguardar o projeto do arquiteto",
   "vai comparar preço"). Se o lead fechou na reunião, escreva "Fechou na reunião".

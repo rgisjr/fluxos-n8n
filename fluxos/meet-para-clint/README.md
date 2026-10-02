@@ -1,6 +1,6 @@
 # Anotação Reuniao Meet (Meet → Clint)
 
-> Status: **publicado e ativo** desde 2026-10-02 15:41 (versão `902610d7`).
+> Status: **publicado e ativo** — versão `bd062d63` (2026-10-02 15:59).
 
 ## Objetivo
 
@@ -39,10 +39,11 @@ são processadas.
 9. **Ler documento** — exporta o Google Doc como texto.
 10. **Extrair com IA** — OpenAI `gpt-5.6-terra` (trocado pelo usuário), saída JSON validada por schema; prompt em
     [prompts/extracao.md](prompts/extracao.md).
-11. **Montar anotação** — bloco HTML (data, mão de obra, recibo, valores, pagamento, objeção,
-    retorno, resumo, link da transcrição); bloco novo + separador + conteúdo anterior;
+11. **Montar anotação** — bloco HTML (data, mão de obra, recibo, negociação dos honorários,
+    pagamento detalhado, objeção, retorno, resumo); bloco novo + separador + conteúdo anterior;
     **todo caractere não-ASCII vira entidade HTML** (a API da Clint corrompe acentos).
-12. **Já gravado?** — se o link desse documento já está no campo, não grava de novo.
+12. **Já gravado?** — se já existe no campo um bloco "Reunião dd/MM/yyyy HH:mm" com a mesma
+    data/hora, não grava de novo.
 13. **Gravar no deal** — `POST /v1/deals/{id}` com `{"fields":{"notas_da_reuniao":"…"}}`.
 
 Retry 3× / 2 s em todas as chamadas HTTP e na IA. Alertas não bloqueiam o fluxo
@@ -88,7 +89,7 @@ Cenários validados em 2026-10-02 (execuções 304784–304808):
 ## Limitações conhecidas
 
 - O dia de retorno fica só no texto (sem tarefa/lembrete na Clint).
-- A API da Clint não envia anexos; o link do documento vai no texto.
+- Sem link da transcrição no card (o arquivo não é compartilhado com o time).
 - A IA pode variar na leitura de valores ditos de forma confusa na conversa (ex.: honorários
   lidos como R$ 3.640,00 numa execução e R$ 3.364,00 em outra) — o vendedor deve conferir
   valores pela transcrição.
@@ -97,6 +98,12 @@ Cenários validados em 2026-10-02 (execuções 304784–304808):
 - O campo cresce a cada reunião, sem limite de histórico.
 
 ## Histórico de decisões
+
+- **2026-10-02 — Ajustes pedidos pelo usuário (versão `bd062d63`).** "Valores" virou
+  **"Negociação"**, só com os **honorários** (proposta, desconto, valor final), sem valores do
+  INSS. "Pagamento" mais detalhado (entrada, parcelas, meio, condições; separa honorários de
+  imposto). **Link da transcrição removido** (arquivo não é compartilhado); a deduplicação
+  passou a usar a data/hora da reunião. Modelo trocado pelo usuário para `gpt-5.6-terra`.
 
 - **2026-10-02 — Estrutura real da pasta (inspeção).** Uma subpasta por reunião → gatilho
   "pasta criada" mantido. Conteúdo varia: "Anotações do Gemini" (resumo + transcrição
