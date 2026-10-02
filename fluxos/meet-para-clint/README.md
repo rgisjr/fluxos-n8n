@@ -99,6 +99,11 @@ Cenários validados em 2026-10-02 (execuções 304784–304808):
 
 ## Histórico de decisões
 
+- **2026-10-02 — Pagamento: "oferecida ou discutida" (rascunho).** Com "combinada", a IA
+  respondia "Não mencionado" quando o lead não fechava, mesmo com parcelamento oferecido
+  (reunião Alisson 12:08: resumo citava "até 12x sem juros no cartão"). Regra nova + exigência
+  de coerência entre campos e resumo.
+
 - **2026-10-02 16:0x — Pagamento mínimo (só no rascunho, NÃO publicado).** Pagamento passa a
   trazer só a forma de pagamento combinada dos honorários, sem valores e sem o imposto.
   Aplicado no rascunho junto com um teste do usuário que desliga a espera de 2 min
