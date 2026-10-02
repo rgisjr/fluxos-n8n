@@ -77,7 +77,14 @@ salvar cópia e README → commit, sem pedir aprovação. Se um teste falhar sem
 - Campos personalizados: `GET /v1/account/fields`. No deal ficam planos em
   `fields.{chave}`; a chave é o rótulo em snake_case truncado em 20 caracteres.
 - Tipo `RICH_TEXT` guarda HTML (`<p>`, `<strong>`, `<br>`, `<a>`).
+- Atualizar campo: `POST /v1/deals/{id}` com `{"fields":{"<chave>":"..."}}` — altera só
+  essa chave, os demais campos ficam intactos.
+- **A API corrompe caracteres não-ASCII** (acentos, emoji viram `�`), mesmo com `\uXXXX`.
+  Em campos RICH_TEXT, enviar tudo que não for ASCII como entidade HTML (`&#231;`).
+- Para "apagar" um RICH_TEXT, enviar `<p></p>` (`""` e `null` são ignorados).
+- Links de deal aparecem como `app.clint.digital/deal/{uuid}` **ou** `app.useclint.com/deal/{uuid}`.
 - A API não cria campos nem envia anexos.
+- Deal de teste: `40ab3b02-cadf-419d-a842-d8870204971e` (contato Régis Marques).
 
 ## Fluxos
 

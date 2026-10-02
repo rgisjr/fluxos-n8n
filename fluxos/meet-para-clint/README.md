@@ -71,3 +71,10 @@ Ver T8 do plano (7 cenários com dados fixados contra um deal de teste).
 - **2026-10-02 — Identificação do deal:** link `app.clint.digital/deal/{uuid}` na descrição
   do evento da agenda (principal); telefone do título (plano B).
 - **2026-10-02 — Onde gravar:** campo único RICH_TEXT (HTML), reunião nova no topo; sem tarefa.
+- **2026-10-02 — Campo na Clint (T5):** chave `notas_da_reuniao` (rótulo "Notas da Reunião",
+  RICH_TEXT, grupo `default`, entidade DEAL). Testado no deal de teste
+  `40ab3b02-cadf-419d-a842-d8870204971e`:
+  - `POST /v1/deals/{id}` com `{"fields":{"notas_da_reuniao":"<html>"}}` grava só esse campo.
+  - A API corrompe não-ASCII → todo caractere não-ASCII vai como entidade HTML (`&#NNN;`).
+  - `""`/`null` não apagam; `<p></p>` sim. Valor anterior `<p></p>` = vazio.
+  - Links de deal podem vir com domínio `app.clint.digital` ou `app.useclint.com`.
