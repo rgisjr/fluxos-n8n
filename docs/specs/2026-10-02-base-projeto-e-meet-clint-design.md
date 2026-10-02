@@ -157,7 +157,7 @@ Nenhuma tarefa/atividade é criada na Clint.
 
 ### 4.3 Configuração manual na Clint (usuário, uma vez)
 
-Criar no **deal** 1 campo personalizado de texto (preferencialmente texto longo, se a Clint oferecer): **Anotações da reunião**.
+Criar no **deal** 1 campo personalizado do tipo **RICH_TEXT** (texto rico): **Anotações da reunião**. Campos RICH_TEXT guardam HTML; o bloco do passo 7 é gravado em HTML (`<p>`, `<strong>`, `<br>`, `<a>`), com o mesmo conteúdo.
 Depois, o Claude lê a chave interna via `GET /v1/account/fields` e a usa no passo 8.
 
 ### 4.4 Erros
