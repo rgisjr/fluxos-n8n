@@ -99,6 +99,11 @@ Cenários validados em 2026-10-02 (execuções 304784–304808):
 
 ## Histórico de decisões
 
+- **2026-10-02 16:0x — Pagamento mínimo (só no rascunho, NÃO publicado).** Pagamento passa a
+  trazer só a forma de pagamento combinada dos honorários, sem valores e sem o imposto.
+  Aplicado no rascunho junto com um teste do usuário que desliga a espera de 2 min
+  ("Aguardar documento" desconectado). **Publicar só depois que a espera for religada.**
+
 - **2026-10-02 — Ajustes pedidos pelo usuário (versão `bd062d63`).** "Valores" virou
   **"Negociação"**, só com os **honorários** (proposta, desconto, valor final), sem valores do
   INSS. "Pagamento" mais detalhado (entrada, parcelas, meio, condições; separa honorários de

@@ -37,11 +37,11 @@ Definições:
 - negociacao: SOMENTE o valor dos honorários, ou seja, o que a empresa cobrou pelo serviço:
   proposta inicial, descontos, contrapropostas e valor final acordado, em R$. NÃO inclua
   valores do INSS/imposto (valor bruto, valor com redução, economia).
-- negociacao_forma_pagamento: descreva em detalhe o que foi negociado para o pagamento, para o
-  time entender exatamente o combinado: forma (Pix, cartão, boleto, débito em conta), à vista
-  ou parcelado, entrada, número e valor das parcelas, datas e condições (ex.: "após a
-  assinatura do contrato"). Se houver condições diferentes para os honorários e para o
-  imposto, deixe claro a que cada uma se refere.
+- negociacao_forma_pagamento: SOMENTE a forma de pagamento combinada para os honorários, no
+  mínimo de palavras, só para o time saber o que foi negociado. Exemplos: "Pix à vista após
+  a assinatura do contrato", "6x sem juros no cartão", "Entrada + 3x no boleto". NÃO repita
+  valores e NÃO fale do pagamento do imposto. Se nenhuma forma de pagamento foi combinada,
+  use "Não mencionado".
 - objecao_decisao: o motivo ou desculpa que o lead deu para não decidir na hora
   (ex.: "precisa falar com a esposa", "vai aguardar o projeto do arquiteto",
   "vai comparar preço"). Se o lead fechou na reunião, escreva "Fechou na reunião".
