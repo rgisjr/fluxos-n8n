@@ -216,29 +216,25 @@ T1, T2, T4 e T6 não dependem do usuário e podem começar já.
 - [ ] `get_node_types` para: `googleDriveTrigger`, `filter`, `code`, `googleCalendar` (event getAll), `if`, `httpRequest`, `googleDrive` (download), `extractFromFile`, `openAi` (message model), `executeWorkflow`. Escolher o modelo OpenAI com `explore_node_resources` (preferir o "mini" mais recente com saída JSON).
 - [ ] Nós, em ordem (nomes exatos — usados nas expressões):
 
-  1. **Google Drive Trigger** — `event: fileCreated` (era `folderCreated`); mesma pasta e credencial.
-  2. **Só documentos da reunião** (Filter) — `mimeType == application/vnd.google-apps.document` E nome casa com o padrão escolhido em T4.
-  3. **Extrair título** (Code, por item):
+  1. **Google Drive Trigger** — **mantém `event: folderCreated`** (T4: cada reunião cria uma subpasta); mesma pasta e credencial.
+  2. **Aguardar documento** (Wait 2 min) — o Doc nasce ~1 s após a pasta e é preenchido em 15–30 s.
+  3. **Extrair título** (Code, por item) — a partir do **nome da pasta** (`{título} - AAAA/MM/DD HH:mm GMT-03:00`):
      ```js
-     const f = $json;
-     const titulo = f.name
-       .replace(/\s*[-–]\s*(Anotações do Gemini|Transcrição|Transcript|Notes by Gemini)\s*$/i, '')
-       .replace(/\s*[-–(]\s*\d{4}[\/-]\d{2}[\/-]\d{2}[\s,]+\d{2}:\d{2}.*$/, '')
-       .trim();
-     const telefone = titulo.match(/\d{10,13}/)?.[0] ?? null;
+     const pasta = $json;
+     const m = pasta.name.match(/^(.*?)\s*-\s*(\d{4})\/(\d{2})\/(\d{2})\s+(\d{2}):(\d{2})\s+GMT([+-]\d{2}):?(\d{2})\s*$/);
+     const titulo = (m ? m[1] : pasta.name).trim();
+     const inicioReuniao = m ? `${m[2]}-${m[3]}-${m[4]}T${m[5]}:${m[6]}:00${m[7]}:${m[8]}` : pasta.createdTime;
+     const foneBruto = titulo.match(/\+?\d[\d\s().-]{8,}\d/)?.[0] ?? '';
+     const telefone = foneBruto.replace(/\D/g, '') || null;
      const nomeLead = titulo
        .replace(/^INSS de obras?\s*[:\/-]\s*/i, '')
-       .split(/\s*[-–]?\s*\d{10,13}/)[0]
+       .replace(foneBruto, '')
+       .split(/\s*[-\/]\s*/)[0]
        .trim();
-     return { json: {
-       titulo, telefone, nomeLead,
-       docId: f.id,
-       docUrl: f.webViewLink ?? `https://docs.google.com/document/d/${f.id}`,
-       criadoEm: f.createdTime,
-     }};
+     return { json: { pastaId: pasta.id, titulo, inicioReuniao, telefone, nomeLead } };
      ```
-     (regex finais ajustadas em T4)
-  4. **Buscar evento** (Google Calendar, getAll, credencial `Google Calendar account`, calendário primário) — `timeMin` = início do dia de `criadoEm` em America/Sao_Paulo, `timeMax` = fim do dia, `query` = `titulo`; `alwaysOutputData: true`; retry.
+  3b. **Listar arquivos da reunião** (Google Drive search, `folderId = pastaId`, fields `*`) → **Escolher documento** (Code): prefere `… - Anotações do Gemini`, senão `… - Transcript`/`Transcrição` (`mimeType` Google Docs); devolve `docId`, `docUrl` (`webViewLink`). Sem documento → aviso "Reunião sem transcrição" e fim.
+  4. **Buscar evento** (Google Calendar, getAll, credencial `Google Calendar account`, calendário primário) — `timeMin` = início do dia de `inicioReuniao` em America/Sao_Paulo, `timeMax` = fim do dia, `query` = `titulo`; `alwaysOutputData: true`; retry.
   5. **Resolver deal ID** (Code, executar uma vez):
      ```js
      const ctx = $('Extrair título').first().json;
@@ -273,7 +269,7 @@ T1, T2, T4 e T6 não dependem do usuário e podem começar já.
       const ia = JSON.parse($json.message?.content ?? $json.content ?? '{}');
       const esc = (s) => String(s ?? 'Não mencionado')
         .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-      const data = DateTime.fromISO(ctx.criadoEm).setZone('America/Sao_Paulo').toFormat('dd/MM/yyyy');
+      const data = DateTime.fromISO(ctx.inicioReuniao).setZone('America/Sao_Paulo').toFormat('dd/MM/yyyy');
       const linha = (rotulo, valor) => `• <strong>${rotulo}:</strong> ${esc(valor)}`;
       const bloco = [
         `<p><strong>📅 Reunião ${data}</strong><br>`,
@@ -308,7 +304,7 @@ T1, T2, T4 e T6 não dependem do usuário e podem começar já.
 
 **Depende de:** T7 + deal de teste do usuário.
 
-Fixar (pin) a saída do **Google Drive Trigger** com um arquivo real ou fictício (`prepare_workflow_pin_data`) e rodar com `test_workflow`. Quando necessário, fixar também a saída de **Buscar evento** e **Ler texto**.
+Fixar (pin) a saída do **Google Drive Trigger** com uma subpasta real ou fictícia (`prepare_workflow_pin_data`) e rodar com `test_workflow`. Quando necessário, fixar também a saída de **Buscar evento** e **Ler texto**.
 
 | # | Cenário | Esperado |
 |---|---|---|
@@ -318,7 +314,7 @@ Fixar (pin) a saída do **Google Drive Trigger** com um arquivo real ou fictíci
 | 4 | Evento sem link, telefone do título = telefone do deal de teste | Achado pelo plano B; gravado |
 | 5 | Sem evento e telefone inexistente | Execute Workflow do Alerta chamado com "Lead não encontrado"; execução `success` |
 | 6 | Transcrição sem falar de recibo/retorno | Itens com "Não mencionado"; nada inventado |
-| 7 | Arquivo de vídeo | Barrado no filtro; nada mais executa |
+| 7 | Subpasta só com vídeo (sem Doc) | Aviso "Reunião sem transcrição"; execução `success` |
 
 - [ ] Rodar os 7 cenários; conferir cada um via `get_workflow_execution` e `GET` do deal de teste.
 - [ ] Ajustar prompt/regex se algum falhar; repetir.

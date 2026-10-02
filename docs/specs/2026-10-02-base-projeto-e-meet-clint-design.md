@@ -117,9 +117,9 @@ Enviar uma mensagem real de aviso de negócio para o número de destino e confir
 
 ### 4.2 Passos
 
-1. **Gatilho Google Drive** — pasta `12LPKim0euEzdnAkPSorKccTx-6seq7Dk`, a cada minuto, evento **arquivo criado** (hoje está "pasta criada"; corrigir).
-2. **Filtrar** — aceitar apenas documentos Google Docs (ignora vídeo). Antes de construir, inspecionar um arquivo real da pasta para decidir se o documento usado é a "Transcrição", as "Anotações do Gemini" ou ambos. Regra: **uma execução útil por reunião** (o outro documento, se existir, é ignorado).
-3. **Achar o evento** — extrair o título da reunião do nome do arquivo (removendo sufixos do Meet: data/hora, "Transcrição", "Anotações do Gemini") e buscar na agenda da Sara o evento com esse título no dia de criação do arquivo.
+1. **Gatilho Google Drive** — pasta `12LPKim0euEzdnAkPSorKccTx-6seq7Dk`, a cada minuto, evento **pasta criada** (mantido: o Meet cria uma subpasta por reunião, `{título} - AAAA/MM/DD HH:mm GMT-03:00`). Uma pasta = uma execução.
+2. **Escolher documento** — aguardar 2 min (o Doc é preenchido logo após a pasta), listar a subpasta e usar o Google Doc `… - Anotações do Gemini` (resumo do Gemini + transcrição completa); se não houver, o `… - Transcript`. Vídeo é ignorado. Sem documento → aviso "Reunião sem transcrição" e fim.
+3. **Achar o evento** — título e data/hora vêm do nome da subpasta; buscar na agenda da Sara o evento com esse título nesse dia.
 4. **Identificar o deal**:
    - **Principal:** extrair o UUID do link `app.clint.digital/deal/{uuid}` da descrição do evento → `GET https://api.clint.digital/v1/deals/{uuid}`.
    - **Plano B** (evento não encontrado, sem link ou deal inexistente): telefone = sequência de ≥ 10 dígitos do título → `GET /v1/deals?phone={telefone}&status=OPEN`; se vazio, repetir sem o DDI `55`; se mais de um, usar o de atualização mais recente.

@@ -1,0 +1,41 @@
+{
+  "id": "Owu9NI5ScaU5zZfA",
+  "name": "Anotação Reuniao Meet",
+  "active": true,
+  "versionId": "dac76e57-6e7d-4a1c-b77f-942f5ce97939",
+  "activeVersionId": "dac76e57-6e7d-4a1c-b77f-942f5ce97939",
+  "createdAt": "2026-09-24T12:55:27.173Z",
+  "updatedAt": "2026-10-02T14:30:53.762Z",
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": true
+  },
+  "tags": [],
+  "parentFolderId": null,
+  "connections": {},
+  "nodes": [
+    {
+      "id": "058b69d6-0367-4640-b5e0-6b1bc22edece",
+      "name": "Google Drive Trigger",
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [0, 0],
+      "parameters": {
+        "pollTimes": { "item": [{ "mode": "everyMinute" }] },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "=https://drive.google.com/drive/u/4/folders/12LPKim0euEzdnAkPSorKccTx-6seq7Dk",
+          "mode": "url"
+        },
+        "event": "folderCreated"
+      },
+      "credentials": { "googleDriveOAuth2Api": { "id": "Xz7XkQuj0KDkVtW5", "name": "sara" } }
+    }
+  ],
+  "nodeGroups": [],
+  "meta": { "templateCredsSetupCompleted": true }
+}
