@@ -1,6 +1,6 @@
 # Anotação Reuniao Meet (Meet → Clint)
 
-> Status: **publicado e ativo** — versão `bd062d63` (2026-10-02 15:59).
+> Status: **publicado e ativo** — versão `6e5ebced` (2026-10-02 16:25), revisada e testada.
 
 ## Objetivo
 
@@ -99,15 +99,21 @@ Cenários validados em 2026-10-02 (execuções 304784–304808):
 
 ## Histórico de decisões
 
+- **2026-10-02 16:25 — Revisão final.** Versão `6e5ebced` = versão publicada pelo usuário
+  (`6bb5b206`, diferença zero): espera de 2 min religada, Pagamento "oferecida ou discutida".
+  Teste no card de teste (anotações do Lucas): Pagamento = "Escolheu Pix à vista após assinatura
+  do contrato; até 6x sem juros no cartão também oferecido". O card de teste ficou com esse
+  bloco como exemplo.
+
 - **2026-10-02 — Pagamento: "oferecida ou discutida" (rascunho).** Com "combinada", a IA
   respondia "Não mencionado" quando o lead não fechava, mesmo com parcelamento oferecido
   (reunião Alisson 12:08: resumo citava "até 12x sem juros no cartão"). Regra nova + exigência
   de coerência entre campos e resumo.
 
-- **2026-10-02 16:0x — Pagamento mínimo (só no rascunho, NÃO publicado).** Pagamento passa a
+- **2026-10-02 16:0x — Pagamento mínimo.** Pagamento passa a
   trazer só a forma de pagamento combinada dos honorários, sem valores e sem o imposto.
   Aplicado no rascunho junto com um teste do usuário que desliga a espera de 2 min
-  ("Aguardar documento" desconectado). **Publicar só depois que a espera for religada.**
+  ("Aguardar documento" desconectado); a espera foi religada e tudo publicado na `6e5ebced`.
 
 - **2026-10-02 — Ajustes pedidos pelo usuário (versão `bd062d63`).** "Valores" virou
   **"Negociação"**, só com os **honorários** (proposta, desconto, valor final), sem valores do
